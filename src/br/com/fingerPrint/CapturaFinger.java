@@ -68,9 +68,9 @@ public class CapturaFinger extends javax.swing.JFrame {
 	private javax.swing.JButton btnVerificar;
 	private javax.swing.JPanel jPanel1;
 	private javax.swing.JScrollPane jScrollPane1;
-	private javax.swing.JLabel lblImagenHuella;
+	private javax.swing.JLabel lblImagenDigital;
 	private javax.swing.JPanel panBtns;
-	private javax.swing.JPanel panHuella;
+	private javax.swing.JPanel panDigital;
 	private javax.swing.JTextArea textArea;
 	// End of variables declaration//GEN-END:variables
 
@@ -90,8 +90,8 @@ public class CapturaFinger extends javax.swing.JFrame {
 	}
 
 	public void desenharDigital(Image image) {
-		lblImagenHuella.setIcon(new ImageIcon(
-				image.getScaledInstance(lblImagenHuella.getWidth(), lblImagenHuella.getHeight(), image.SCALE_DEFAULT)));
+		lblImagenDigital.setIcon(new ImageIcon(
+				image.getScaledInstance(lblImagenDigital.getWidth(), lblImagenDigital.getHeight(), image.SCALE_DEFAULT)));
 		repaint();
 	}
 
@@ -286,7 +286,7 @@ public class CapturaFinger extends javax.swing.JFrame {
 		}
 	}
 
-	public void verificarHuella(String nom) {
+	public void verificarDigital(String nom) {
 		
 		try {
 			
@@ -334,7 +334,7 @@ public class CapturaFinger extends javax.swing.JFrame {
 
 			while (rs.next()) {
 				byte templateBuffer[] = rs.getBytes("digital");
-				String nombre = rs.getString("nome");
+				String nome = rs.getString("nome");
 				
 				DPFPTemplate referenceTemplate = DPFPGlobal.getTemplateFactory().createTemplate(templateBuffer);
 
@@ -343,7 +343,7 @@ public class CapturaFinger extends javax.swing.JFrame {
 				
 				if (result.isVerified()) {
 					
-					JOptionPane.showMessageDialog(null, "A Digital capturada " + nombre, "Verificação da Digital",
+					JOptionPane.showMessageDialog(null, "A Digital capturada " + nome, "Verificação da Digital",
 							JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
@@ -371,8 +371,8 @@ public class CapturaFinger extends javax.swing.JFrame {
 	// Code">//GEN-BEGIN:initComponents
 	private void initComponents() {
 
-		panHuella = new javax.swing.JPanel();
-		lblImagenHuella = new javax.swing.JLabel();
+		panDigital = new javax.swing.JPanel();
+		lblImagenDigital = new javax.swing.JLabel();
 		panBtns = new javax.swing.JPanel();
 		btnVerificar = new javax.swing.JButton();
 		btnGuardar = new javax.swing.JButton();
@@ -393,22 +393,22 @@ public class CapturaFinger extends javax.swing.JFrame {
 			}
 		});
 
-		panHuella.setBorder(javax.swing.BorderFactory.createTitledBorder(
+		panDigital.setBorder(javax.swing.BorderFactory.createTitledBorder(
 				new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED), "Impressão Digital",
 				javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
 
-		lblImagenHuella.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+		lblImagenDigital.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
-		javax.swing.GroupLayout panHuellaLayout = new javax.swing.GroupLayout(panHuella);
-		panHuella.setLayout(panHuellaLayout);
-		panHuellaLayout.setHorizontalGroup(panHuellaLayout
+		javax.swing.GroupLayout panDigitalLayout = new javax.swing.GroupLayout(panDigital);
+		panDigital.setLayout(panDigitalLayout);
+		panDigitalLayout.setHorizontalGroup(panDigitalLayout
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(panHuellaLayout.createSequentialGroup().addContainerGap()
-						.addComponent(lblImagenHuella, javax.swing.GroupLayout.DEFAULT_SIZE, 101, Short.MAX_VALUE)
+				.addGroup(panDigitalLayout.createSequentialGroup().addContainerGap()
+						.addComponent(lblImagenDigital, javax.swing.GroupLayout.DEFAULT_SIZE, 101, Short.MAX_VALUE)
 						.addContainerGap()));
-		panHuellaLayout.setVerticalGroup(panHuellaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-				.addGroup(panHuellaLayout.createSequentialGroup().addContainerGap()
-						.addComponent(lblImagenHuella, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
+		panDigitalLayout.setVerticalGroup(panDigitalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGroup(panDigitalLayout.createSequentialGroup().addContainerGap()
+						.addComponent(lblImagenDigital, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
 						.addContainerGap()));
 
 		panBtns.setBorder(javax.swing.BorderFactory.createTitledBorder(
@@ -503,12 +503,12 @@ public class CapturaFinger extends javax.swing.JFrame {
 				.addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
 						layout.createSequentialGroup()
 								.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-								.addComponent(panHuella, javax.swing.GroupLayout.PREFERRED_SIZE,
+								.addComponent(panDigital, javax.swing.GroupLayout.PREFERRED_SIZE,
 										javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
 								.addGap(187, 187, 187)));
 		layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 				.addGroup(layout.createSequentialGroup().addGap(20, 20, 20)
-						.addComponent(panHuella, javax.swing.GroupLayout.PREFERRED_SIZE,
+						.addComponent(panDigital, javax.swing.GroupLayout.PREFERRED_SIZE,
 								javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
 						.addGap(18, 18, 18)
 						.addComponent(panBtns, javax.swing.GroupLayout.PREFERRED_SIZE,
@@ -525,8 +525,8 @@ public class CapturaFinger extends javax.swing.JFrame {
 	}// GEN-LAST:event_btnSairActionPerformed
 
 	private void btnVerificarActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnVerificarActionPerformed
-		String nombre = JOptionPane.showInputDialog("Nome para verificar: ");
-		verificarHuella(nombre);
+		String nome = JOptionPane.showInputDialog("Nome para verificar: ");
+		verificarDigital(nome);
 		recrutador.clear();
 	}// GEN-LAST:event_btnVerificarActionPerformed
 
@@ -534,7 +534,7 @@ public class CapturaFinger extends javax.swing.JFrame {
 		try {
 			guardarDigital();
 			recrutador.clear();
-			lblImagenHuella.setIcon(null);
+			lblImagenDigital.setIcon(null);
 			start();
 		} catch (SQLException ex) {
 			Logger.getLogger(CapturaFinger.class.getName()).log(Level.SEVERE, null, ex);
