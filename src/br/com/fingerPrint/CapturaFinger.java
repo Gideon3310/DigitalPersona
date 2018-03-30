@@ -64,7 +64,7 @@ public class CapturaFinger extends javax.swing.JFrame {
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JButton btnGuardar;
 	private javax.swing.JButton btnIdentificar;
-	private javax.swing.JButton btnSalir;
+	private javax.swing.JButton btnSair;
 	private javax.swing.JButton btnVerificar;
 	private javax.swing.JPanel jPanel1;
 	private javax.swing.JScrollPane jScrollPane1;
@@ -125,22 +125,16 @@ public class CapturaFinger extends javax.swing.JFrame {
 
 	// Metodo para procesar a captura da digital
 	public void ProcesarCaptura(DPFPSample sample) {
-		// Procesar la muestra de la huella y crear un conjunto de caracterisitcas con
-		// el proposito de inscripcion.
+		
 		featuresIncripcion = extrairCaracteristicas(sample, DPFPDataPurpose.DATA_PURPOSE_ENROLLMENT);
 
-		// Procesar la muestra de la huella y crear un conjunto de caracteristicas con
-		// el proposito de verificacion.
 		featuresVerificacion = extrairCaracteristicas(sample, DPFPDataPurpose.DATA_PURPOSE_VERIFICATION);
 
-		// Comprobar la calidad de la muestra de la huella y lo añade a su recrutador si
-		// es bueno
 		if (featuresIncripcion != null)
 			try {
 				System.out.println("As características da digital foram criadas");
-				recrutador.addFeatures(featuresIncripcion);// Agregar las caracteristicas de la huella a la plantilla a
-															// crear
-
+				recrutador.addFeatures(featuresIncripcion);
+				
 				// Desenhar Digital
 				Image image = criarImagemDigital(sample);
 				desenharDigital(image);
@@ -152,9 +146,9 @@ public class CapturaFinger extends javax.swing.JFrame {
 				System.out.println("Error: " + ex.getMessage());
 			} finally {
 				estadoDaDigital();
-				// Comprueba si la plantilla se ha creado
+				
 				switch (recrutador.getTemplateStatus()) {
-				case TEMPLATE_STATUS_READY: // informe de éxito y detiene la captura de huella
+				case TEMPLATE_STATUS_READY: 
 					stop();
 					setTemplate(recrutador.getTemplate());
 					enviarTexto("O modelo da digital foi criado, você pode verificá-lo ou identificá-lo");
@@ -164,7 +158,7 @@ public class CapturaFinger extends javax.swing.JFrame {
 					btnGuardar.grabFocus();
 					break;
 
-				case TEMPLATE_STATUS_FAILED: // informe de fallas y reiniciar la captura de huellas
+				case TEMPLATE_STATUS_FAILED: 
 					recrutador.clear();
 					stop();
 					estadoDaDigital();
@@ -262,21 +256,19 @@ public class CapturaFinger extends javax.swing.JFrame {
 	    }
 
 	public void guardarDigital() throws SQLException {
-		// Obtiene los datos del template de la huella actual
+		
 		ByteArrayInputStream dadosDigital = new ByteArrayInputStream(template.serialize());
 		Integer tamaDigital = template.serialize().length;
 
-		// Pregunta el nombre la persona a la cual corresponde dicha huella
 		String nome = JOptionPane.showInputDialog("Nome:");
 		try {
-			// Establece los valores para la sentencia SQL
+			
 			Connection c = cn.connectar();
 			System.out.println(c.getSchema());
 			PreparedStatement guardarStmt = c.prepareStatement("INSERT INTO finger(nome, digital) values(?,?)");
 			guardarStmt.setString(1, nome);
 			guardarStmt.setBinaryStream(2, dadosDigital, tamaDigital);
 
-			// Ejecuta la sentencia
 			guardarStmt.execute();
 			guardarStmt.close();
 			JOptionPane.showMessageDialog(null, "Digital salva corretamente.");
@@ -285,7 +277,7 @@ public class CapturaFinger extends javax.swing.JFrame {
 			btnVerificar.grabFocus();
 
 		} catch (SQLException ex) {
-			// Si ocurre un error lo indida en consola
+			
 			System.out.println("Erro ao salvar os dados da impressão digital.");
 			System.out.println(ex);
 			JOptionPane.showMessageDialog(null, "Erro ao salvar os dados da impressão digital.");
@@ -295,45 +287,37 @@ public class CapturaFinger extends javax.swing.JFrame {
 	}
 
 	public void verificarHuella(String nom) {
-		// Verificar la huella digital actual con otra en la base de datos
+		
 		try {
-			// Estable los valores para la sentencia SQL
+			
 			Connection c = cn.connectar();
-			// Obtiene la plantilla correspondiente a la persina indicada
+			
 			PreparedStatement verificarStmt = c.prepareStatement("SELECT digital FROM finger WHERE nome = ?");
 			verificarStmt.setString(1, nom);
 			ResultSet rs = verificarStmt.executeQuery();
 
-			// Si se encuentra el nombre en la base de datos
 			if (rs.next()) {
-				// Lee la plantilla de la base de datos
+				
 				byte templateBuffer[] = rs.getBytes("digital");
-				// Crea una nueva plantilla a paritr de la guardada en la base de datos
+				
 				DPFPTemplate referenceTemplate = DPFPGlobal.getTemplateFactory().createTemplate(templateBuffer);
-				// Envia la plantilla creada al objeto contenedor de Template del componente de
-				// huella digital
+				
 				setTemplate(referenceTemplate);
 
-				// Compara las caracteristicas de la huella recientemente capturada con la
-				// plantilla guardada al usuario especifico en la base de datos
 				DPFPVerificationResult result = verificador.verify(featuresVerificacion, getTemplate());
 
-				// compara las platillas (actual contra la de la base de datos)
 				if (result.isVerified())
 					JOptionPane.showMessageDialog(null, "Os traços capturados coincidem com os de " + nom,
 							"Verificação da Digital", JOptionPane.INFORMATION_MESSAGE);
 				else
 					JOptionPane.showMessageDialog(null, "A Digital não corresponde " + nom, "Verificação de Digital",
 							JOptionPane.ERROR_MESSAGE);
-
-				// Si no concuerda con alguna huella correspondiente al nombre lo indica con un
-				// mensaje
+				
 			} else {
 				JOptionPane.showMessageDialog(null, "Não existe un registro da digital para " + nom,
 						"Verificação da Digital", JOptionPane.ERROR_MESSAGE);
 			}
 		} catch (SQLException ex) {
-			// Si ocurre un error lo indica en la consola
 			System.out.println("Error: " + ex);
 			JOptionPane.showMessageDialog(null, "Erro ao verificar dados da Digital.");
 		} finally {
@@ -341,48 +325,34 @@ public class CapturaFinger extends javax.swing.JFrame {
 		}
 	}
 
-	// Identicar a una persona registrada por medio de su huella digital
 	public void identificarDigital() throws IOException {
 		try {
-			// Establece los valres para la sentencia SQL
 			Connection c = cn.connectar();
 
-			// Obtiene todas las huellas de la base de datos
 			PreparedStatement identificarStmt = c.prepareStatement("SELECT nome, digital FROM finger");
 			ResultSet rs = identificarStmt.executeQuery();
 
-			// Si se encuentra el nombre de la base de datos
 			while (rs.next()) {
-				// Lee la plantilla de la base de datos
 				byte templateBuffer[] = rs.getBytes("digital");
 				String nombre = rs.getString("nome");
-				// Crea una nueva plantilla a apritr de la guardada en la base de datos
+				
 				DPFPTemplate referenceTemplate = DPFPGlobal.getTemplateFactory().createTemplate(templateBuffer);
 
-				// Envia la plantilla creada al objeto contenedor de Template del
-				// componete de huella digital
 				setTemplate(referenceTemplate);
-				// Compara las caracteristicas de la huella recientemente capturada con
-				// alguna plantilla guardada en la base de datos que coincida con ese tipo
 				DPFPVerificationResult result = verificador.verify(featuresVerificacion, getTemplate());
-				// compara las plantillas actual con las de la base de datos
-				// si encuentra correspondencia dibuja el mapa
-				// e indica el nombre de la persona que coincidió.
+				
 				if (result.isVerified()) {
-					// crea la imagen de los datos guardados de las huellas guardadas
-					// en la base de datos
+					
 					JOptionPane.showMessageDialog(null, "A Digital capturada " + nombre, "Verificação da Digital",
 							JOptionPane.INFORMATION_MESSAGE);
 					return;
 				}
 			}
-			// Si no encuentra alguna huella correspondiente al nombre lo indica con un
-			// mensaje
+			
 			JOptionPane.showMessageDialog(null, "Não há registro que corresponda com a Digital.",
-					"Verificacion de huella", JOptionPane.ERROR_MESSAGE);
+					"Verificar a Digital", JOptionPane.ERROR_MESSAGE);
 			setTemplate(null);
 		} catch (SQLException e) {
-			// Si ocurre un error lo indica en la consola
 			System.out.println("Error: " + e.getMessage());
 			JOptionPane.showMessageDialog(null, "Erro ao identificar a impressão digital. " + e.getMessage());
 		} finally {
@@ -407,7 +377,7 @@ public class CapturaFinger extends javax.swing.JFrame {
 		btnVerificar = new javax.swing.JButton();
 		btnGuardar = new javax.swing.JButton();
 		btnIdentificar = new javax.swing.JButton();
-		btnSalir = new javax.swing.JButton();
+		btnSair = new javax.swing.JButton();
 		jPanel1 = new javax.swing.JPanel();
 		jScrollPane1 = new javax.swing.JScrollPane();
 		textArea = new javax.swing.JTextArea();
@@ -472,12 +442,12 @@ public class CapturaFinger extends javax.swing.JFrame {
 			}
 		});
 
-		btnSalir.setText("Sair");
-		btnSalir.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-		btnSalir.setContentAreaFilled(false);
-		btnSalir.addActionListener(new java.awt.event.ActionListener() {
+		btnSair.setText("Sair");
+		btnSair.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+		btnSair.setContentAreaFilled(false);
+		btnSair.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				btnSalirActionPerformed(evt);
+				btnSairActionPerformed(evt);
 			}
 		});
 
@@ -491,7 +461,7 @@ public class CapturaFinger extends javax.swing.JFrame {
 						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 142, Short.MAX_VALUE)
 						.addComponent(btnGuardar, javax.swing.GroupLayout.PREFERRED_SIZE, 53,
 								javax.swing.GroupLayout.PREFERRED_SIZE)
-						.addGap(45, 45, 45).addComponent(btnSalir, javax.swing.GroupLayout.PREFERRED_SIZE, 53,
+						.addGap(45, 45, 45).addComponent(btnSair, javax.swing.GroupLayout.PREFERRED_SIZE, 53,
 								javax.swing.GroupLayout.PREFERRED_SIZE)
 						.addGap(24, 24, 24)));
 		panBtnsLayout.setVerticalGroup(panBtnsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -503,7 +473,7 @@ public class CapturaFinger extends javax.swing.JFrame {
 										javax.swing.GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnGuardar, javax.swing.GroupLayout.PREFERRED_SIZE, 30,
 										javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addComponent(btnSalir, javax.swing.GroupLayout.PREFERRED_SIZE, 27,
+								.addComponent(btnSair, javax.swing.GroupLayout.PREFERRED_SIZE, 27,
 										javax.swing.GroupLayout.PREFERRED_SIZE))
 						.addContainerGap(20, Short.MAX_VALUE)));
 
@@ -550,9 +520,9 @@ public class CapturaFinger extends javax.swing.JFrame {
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
 
-	private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnSalirActionPerformed
+	private void btnSairActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnSairActionPerformed
 		System.exit(0);
-	}// GEN-LAST:event_btnSalirActionPerformed
+	}// GEN-LAST:event_btnSairActionPerformed
 
 	private void btnVerificarActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_btnVerificarActionPerformed
 		String nombre = JOptionPane.showInputDialog("Nome para verificar: ");
@@ -591,7 +561,7 @@ public class CapturaFinger extends javax.swing.JFrame {
 		btnGuardar.setEnabled(false);
 		btnIdentificar.setEnabled(false);
 		btnVerificar.setEnabled(false);
-		btnSalir.grabFocus();
+		btnSair.grabFocus();
 	}// GEN-LAST:event_formWindowOpened
 
 	/**
